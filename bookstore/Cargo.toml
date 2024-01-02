@@ -1,0 +1,28 @@
+[package]
+name = "bookstore"
+version = "0.2.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = { version = "1.0.183", features = ["derive"] }
+actix-web = "4.3.1"
+async-trait = "0.1.73"
+dotenv = "0.15.0"
+futures = "0.3.28"
+futures-util = "0.3.28"
+log = "0.4.20"
+log4rs = { version = "1.2.0", features = ["console_appender"] }
+bcrypt = "0.15.0"
+jwt = "0.16.0"
+sha2 = "0.10.7"
+hmac = "0.12.1"
+derive_more = "0.99.17"
+utoipa = { version = "4.1.0", features = ["actix_extras", "chrono", "uuid"] }
+utoipa-swagger-ui = { version = "5.0.0", features = ["actix-web", "debug-embed"] }
+serde_json = "1.0.105"
+regex = "1.9.3"
+sqlx = { version = "0.7.3", features = ["postgres", "runtime-tokio-rustls", "uuid", "chrono"]}
+chrono = { version = "0.4.27", features = ["serde"] }
+uuid = { version = "1.6.1", features = ["v4", "serde"] }

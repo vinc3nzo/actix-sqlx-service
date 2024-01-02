@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  api-bookstore:
+    container_name: api-bookstore
+    build:
+      context: ../bookstore
+      dockerfile: ../deployment/prod/bookstore/Dockerfile
+      args:
+        BIN_NAME: bookstore
+    expose:
+      - "3000"
+    depends_on:
+      bookstore-postgres:
+        condition: service_healthy
+    environment:
+      APP_DOCS_ON: ${APP_DOCS_ON:-false}
+      APP_SECRET: ${APP_SECRET:?Set the app secret}
+      APP_HOST: ${APP_HOST:-0.0.0.0}
+      APP_PORT: ${APP_PORT:-3000}
+      APP_ADMIN_USER: ${APP_ADMIN_USER:?Set the admin user nickname}
+      APP_ADMIN_PASS: ${APP_ADMIN_PASS:?Set the admin user password}
+      APP_DATABASE_NAME: ${APP_DATABASE_NAME:-bookstore}
+      APP_DATABASE_HOST: ${APP_DATABASE_HOST:-bookstore-postgres}
+      APP_DATABASE_PORT: ${APP_DATABASE_PORT:-5432}
+      APP_DATABASE_USER: ${APP_DATABASE_USER:-postgres}
+      APP_DATABASE_PASS: ${APP_DATABASE_PASS:?Set the database password}
+
+  bookstore-postgres:
+    container_name: bookstore-postgres
+    image: postgres
+    restart: always
+    ports:
+      - "${APP_DATABASE_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${APP_DATABASE_USER:-postgres}
+      POSTGRES_PASSWORD: ${APP_DATABASE_PASS:?Set the database password}
+      POSTGRES_DB: ${APP_DATABASE_NAME:-bookstore}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - /srv/bookstore/postgres-data:/var/lib/postgresql/data
+
+  bookstore-nginx:
+    container_name: bookstore-nginx
+    build:
+      context: ./prod/nginx
+    ports:
+      - "8000:8000"
+    depends_on:
+      - api-bookstore

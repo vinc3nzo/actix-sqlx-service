@@ -1,0 +1,1 @@
+ALTER TABLE users ALTER COLUMN date_registered TYPE timestamp with time zone;

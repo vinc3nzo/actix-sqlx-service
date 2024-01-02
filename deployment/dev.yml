@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  dev-api-bookstore:
+    container_name: dev-api-bookstore
+    build:
+      context: ../bookstore
+      dockerfile: ../deployment/dev/bookstore/Dockerfile
+      args:
+        BIN_NAME: bookstore
+    ports:
+      - "3000:3000"
+    depends_on:
+      dev-bookstore-postgres:
+        condition: service_healthy
+    environment:
+      RUST_BACKTRACE: 1
+      APP_DOCS_ON: ${APP_DOCS_ON:-true}
+      APP_SECRET: ${APP_SECRET:?Set the app secret}
+      APP_HOST: ${APP_HOST:-0.0.0.0}
+      APP_PORT: ${APP_PORT:-3000}
+      APP_ADMIN_USER: ${APP_ADMIN_USER:-admin}
+      APP_ADMIN_PASS: ${APP_ADMIN_PASS:-1234}
+      APP_DATABASE_NAME: ${APP_DATABASE_NAME:-dev_bookstore}
+      APP_DATABASE_HOST: ${APP_DATABASE_HOST:-dev-bookstore-postgres}
+      APP_DATABASE_PORT: ${APP_DATABASE_PORT:-5432}
+      APP_DATABASE_USER: ${APP_DATABASE_USER:-postgres}
+      APP_DATABASE_PASS: ${APP_DATABASE_PASS:-postgres}
+
+  dev-bookstore-postgres:
+    container_name: dev-bookstore-postgres
+    image: postgres
+    restart: always
+    ports:
+      - "${APP_DATABASE_PORT:-5432}:5432"
+    environment:
+      POSTGRES_USER: ${APP_DATABASE_USER:-postgres}
+      POSTGRES_PASSWORD: ${APP_DATABASE_PASS:-postgres}
+      POSTGRES_DB: ${APP_DATABASE_NAME:-dev_bookstore}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
